@@ -11,13 +11,25 @@ st.title("🎟️ Generator Tiket Khusus A4 (Otomatis)")
 col1, col2 = st.columns([1, 1.5])
 
 with col1:
-    st.subheader("📝 1. Edit Data Tiket")
+    st.subheader("🖼️ 1. Pilih Template")
+    jenis_template = st.radio(
+        "Sesuaikan dengan panjang nama grup/sekolah:",
+        ["Template Nama Panjang (Gambar 1)", "Template Nama Pendek (Gambar 2)"]
+    )
+
+    st.subheader("📝 2. Edit Data Tiket")
     tanggal = st.text_input("Tanggal Kunjungan", "21 NOVEMBER 2026")
     nama_grup = st.text_input("Nama Grup / Sekolah", "TEST DULU SEBELUM NYOBA CETAK")
     
-    st.info("💡 Posisi vertikal sudah dikalibrasi ulang sedikit ke atas agar pas di tengah area putih.")
+    st.info("💡 Gambar dan lebar maksimal teks otomatis menyesuaikan template yang dipilih di atas.")
 
-template_path = "Tiket Khusus Kaumpandak Waterpark (1).png"
+# Menentukan file gambar dan batas lebar berdasarkan pilihan
+if "Panjang" in jenis_template:
+    template_path = "Tiket Ceria Kaumpandak Waterpark.png"
+    batas_lebar_grup_persen = 0.85 # Area putih lebih luas (85% lebar gambar)
+else:
+    template_path = "Tiket Khusus Kaumpandak Waterpark (1).png"
+    batas_lebar_grup_persen = 0.40 # Area putih lebih sempit (40% lebar gambar)
 
 try:
     img_master = Image.open(template_path).convert("RGB")
@@ -51,7 +63,7 @@ try:
         return font
 
     max_width_tanggal = int(W * 0.18) 
-    max_width_grup = int(W * 0.38)    
+    max_width_grup = int(W * batas_lebar_grup_persen)    
 
     font_tanggal = get_optimal_font(tanggal, font_path, max_font_size=int(H * 0.045), max_width=max_width_tanggal, draw=draw)
     font_grup = get_optimal_font(nama_grup, font_path, max_font_size=int(H * 0.08), max_width=max_width_grup, draw=draw)
@@ -71,12 +83,10 @@ try:
         y = y_center - (text_height / 2) - offset_y
         draw.text((x, y), text, font=font, fill=color)
 
-    # --- KOORDINAT DIKALIBRASI ULANG ---
-    # Dinaikkan sedikit dari 0.185 ke 0.175
+    # Koordinat rata tengah
     titik_tengah_x_tanggal = int(W * 0.81)
     titik_tengah_y_tanggal = int(H * 0.175)
     
-    # Dinaikkan sedikit dari 0.90 ke 0.89
     titik_tengah_x_grup = int(W * 0.51) 
     titik_tengah_y_grup = int(H * 0.89)
 
@@ -100,7 +110,7 @@ try:
             kanvas_a4.paste(tiket_resized, (x, y))
 
     with col2:
-        st.subheader("📄 2. Live Preview Kertas A4")
+        st.subheader("📄 3. Live Preview Kertas A4")
         st.image(kanvas_a4, caption="Preview Kertas A4 (Isi 10 Tiket, siap digunting)", use_column_width=True)
 
         buf_pdf = io.BytesIO()
@@ -116,4 +126,4 @@ try:
         )
 
 except FileNotFoundError:
-    st.error("❌ Error: File gambar template tidak ditemukan. Pastikan nama file gambar di dalam folder sama persis.")
+    st.error(f"❌ Error: File gambar '{template_path}' tidak ditemukan. Pastikan nama file tersebut ada di folder yang sama.")
