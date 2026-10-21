@@ -32,7 +32,7 @@ if "Panjang" in jenis_template:
 else:
     template_path = "Tiket Khusus Kaumpandak Waterpark (1).png"
     batas_lebar_grup_persen = 0.40 
-    y_grup_persen = 0.88           
+    y_grup_persen = 0.875           
 
 try:
     img_master = Image.open(template_path).convert("RGB")
