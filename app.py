@@ -15,9 +15,9 @@ col1, col2 = st.columns([1, 1.5])
 with col1:
     st.subheader("📝 1. Edit Data Tiket")
     tanggal = st.text_input("Tanggal Kunjungan", "21 NOVEMBER 2026")
-    nama_grup = st.text_input("Nama Grup / Sekolah", "TEST DULU SEBELUM NYOBA CETAK KARENA NAMA INI SANGAT PANJANG")
+    nama_grup = st.text_input("Nama Grup / Sekolah", "TEST DULU SEBELUM NYOBA CETAK")
     
-    st.info("💡 Sistem Auto-Scaling kini lebih ketat. Font dijamin tidak akan keluar dari lengkungan area putih.")
+    st.info("💡 Posisi teks bawah sudah digeser sedikit ke kanan menyesuaikan lengkungan air, dan lebar maksimal diperketat.")
 
 # --- PROSES PEMBUATAN TIKET & KANVAS A4 ---
 template_path = "Tiket Khusus Kaumpandak Waterpark (1).png"
@@ -36,59 +36,58 @@ try:
         with st.spinner("Mengunduh font tebal..."):
             urllib.request.urlretrieve(font_url, font_path)
 
-    # --- FUNGSI AUTO-SCALING FONT (YANG DISEMPURNAKAN) ---
+    # --- FUNGSI AUTO-SCALING FONT (LEBIH KETAT) ---
     def get_optimal_font(text, font_path, max_font_size, max_width, draw):
-        """Mengecilkan ukuran font secara otomatis jika teks lebih lebar dari max_width"""
         current_size = max_font_size
         font = ImageFont.truetype(font_path, current_size)
         
-        while current_size > 10: # Batas minimal ukuran font agar tidak terlalu tak terlihat
+        while current_size > 10: 
             try:
                 bbox = draw.textbbox((0, 0), text, font=font)
                 text_width = bbox[2] - bbox[0]
             except AttributeError:
                 text_width, _ = draw.textsize(text, font=font)
                 
-            # Jika lebar teks sudah lebih kecil dari batas toleransi (max_width), berhenti mengecilkan
             if text_width <= max_width:
                 break
             
-            # Jika belum, kurangi ukuran font secara bertahap
             current_size -= 2
             font = ImageFont.truetype(font_path, current_size)
             
         return font
 
-    # --- PENGATURAN AREA MAKSIMAL YANG LEBIH KETAT (PERBAIKAN) ---
-    # Toleransi lebar diperkecil agar aman dari lengkungan pinggir kotak putih
-    max_width_tanggal = int(W * 0.18) # Hanya mentoleransi maksimal 18% dari lebar gambar total
-    max_width_grup = int(W * 0.42)    # Hanya mentoleransi maksimal 42% dari lebar gambar total (area aman garis abu-abu)
+    # Batas maksimal lebar teks diperketat agar tidak menyentuh ujung cipratan air sama sekali
+    max_width_tanggal = int(W * 0.18) 
+    max_width_grup = int(W * 0.38)    # Hanya mentoleransi 38% lebar gambar agar sangat aman
 
-    # Tentukan font optimal
     font_tanggal = get_optimal_font(tanggal, font_path, max_font_size=int(H * 0.045), max_width=max_width_tanggal, draw=draw)
     font_grup = get_optimal_font(nama_grup, font_path, max_font_size=int(H * 0.08), max_width=max_width_grup, draw=draw)
 
-    # --- FUNGSI UNTUK MENULIS TEKS RATA TENGAH ---
+    # --- FUNGSI UNTUK MENULIS TEKS RATA TENGAH (AKURASI TINGGI) ---
     def draw_text_centered(draw, text, font, x_center, y_center, color):
         try:
             bbox = draw.textbbox((0, 0), text, font=font)
             text_width = bbox[2] - bbox[0]
             text_height = bbox[3] - bbox[1]
+            offset_x = bbox[0] # Membaca offset asli font agar tengahnya tidak melenceng
+            offset_y = bbox[1]
         except AttributeError:
             text_width, text_height = draw.textsize(text, font=font)
+            offset_x, offset_y = 0, 0
         
-        x = x_center - (text_width / 2)
-        y = y_center - (text_height / 2) - int(H * 0.01)
+        # Penempatan titik yang sudah disesuaikan dengan offset bounding box
+        x = x_center - (text_width / 2) - offset_x
+        y = y_center - (text_height / 2) - offset_y - int(H * 0.01)
         draw.text((x, y), text, font=font, fill=color)
 
-    # --- KOORDINAT BERDASARKAN GARIS TANDA DI GAMBAR ---
+    # --- KOORDINAT BARU ---
     titik_tengah_x_tanggal = int(W * 0.81)
     titik_tengah_y_tanggal = int(H * 0.165)
     
-    titik_tengah_x_grup = int(W * 0.5)
+    # Titik X Grup digeser dari 0.50 menjadi 0.51 (Agak ke kanan) menjauhi cipratan air kiri
+    titik_tengah_x_grup = int(W * 0.51) 
     titik_tengah_y_grup = int(H * 0.885)
 
-    # Terapkan teks ke gambar
     draw_text_centered(draw, tanggal, font_tanggal, titik_tengah_x_tanggal, titik_tengah_y_tanggal, "#003366")
     draw_text_centered(draw, nama_grup, font_grup, titik_tengah_x_grup, titik_tengah_y_grup, "#003366")
 
