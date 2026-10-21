@@ -2,9 +2,7 @@ import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 import io
 import os
-import urllib.request
 import base64
-import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Cetak Tiket A4 Otomatis", layout="wide")
 
@@ -26,7 +24,7 @@ with col1:
         
         tombol_cek = st.form_submit_button("✅ Cek / Tampilkan")
     
-    st.info("💡 Klik Cek / Tampilkan lalu Anda bisa langsung Print atau Download File PDF-nya.")
+    st.info("💡 Klik Cek / Tampilkan, lalu gunakan tombol Download atau Buka & Cetak PDF di sebelah kanan.")
 
 if "Panjang" in jenis_template:
     template_path = "Tiket Ceria Kaumpandak Waterpark.png"
@@ -122,22 +120,20 @@ try:
             kanvas_a4.paste(tiket_resized, (x, y))
 
     with col2:
-        st.subheader("📄 3. Preview & Cetak Langsung")
+        st.subheader("📄 3. Preview & Cetak")
         
-        # 1. Tampilkan preview gambar yang stabil agar tidak blank
-        st.image(kanvas_a4, use_container_width=True)
+        # Tampilkan preview gambar
+        st.image(kanvas_a4, caption="Preview Kertas A4 (Isi 10 Tiket, siap digunting)", use_container_width=True)
 
-        # 2. Proses PDF ke memori
         buf_pdf = io.BytesIO()
         kanvas_a4.save(buf_pdf, format="PDF", resolution=300.0)
         byte_pdf = buf_pdf.getvalue()
         
-        # 3. Baris Tombol Download & Print
         btn_col1, btn_col2 = st.columns(2)
         
         with btn_col1:
             st.download_button(
-                label="⬇️ Download File PDF",
+                label="⬇️ Download PDF",
                 data=byte_pdf,
                 file_name=f"Cetak_Tiket_{nama_grup.replace(' ', '_')}.pdf",
                 mime="application/pdf",
@@ -145,25 +141,10 @@ try:
             )
             
         with btn_col2:
-            # Mengonversi PDF ke Base64
+            # Mengonversi PDF ke Base64 agar bisa dibuka langsung di tab baru browser
             b64_pdf = base64.b64encode(byte_pdf).decode('utf-8')
-            
-            # Script HTML + JS menggunakan library Print.js (solusi anti-blank untuk mencetak PDF base64)
-            print_html = f"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/print-js/1.6.0/print.js"></script>
-            </head>
-            <body style="margin: 0;">
-                <button onclick="printJS({{printable: '{b64_pdf}', type: 'pdf', base64: true}})" 
-                    style="width: 100%; padding: 0.5rem 1rem; background-color: #FF4B4B; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-family: sans-serif; font-weight: 500;">
-                    🖨️ Cetak Langsung (Print)
-                </button>
-            </body>
-            </html>
-            """
-            components.html(print_html, height=50)
+            pdf_href = f'<a href="data:application/pdf;base64,{b64_pdf}" target="_blank" style="display:inline-block; width:100%; text-align:center; padding: 0.5rem 1rem; background-color: #FF4B4B; color: white; text-decoration: none; border-radius: 4px; font-size: 15px; font-family: sans-serif; font-weight: 500; box-sizing: border-box;">🖨️ Buka & Cetak PDF</a>'
+            st.markdown(pdf_href, unsafe_allow_html=True)
 
 except FileNotFoundError:
     st.error(f"❌ Error: File gambar '{template_path}' tidak ditemukan. Pastikan nama file tersebut ada di folder yang sama.")
