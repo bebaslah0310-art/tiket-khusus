@@ -21,17 +21,19 @@ with col1:
     tanggal = st.text_input("Tanggal Kunjungan", "21 NOVEMBER 2026")
     nama_grup = st.text_input("Nama Grup / Sekolah", "TEST DULU SEBELUM NYOBA CETAK")
     
-    st.info("💡 Posisi vertikal teks kini disesuaikan secara otomatis berdasarkan template yang dipilih agar tidak menabrak batas bawah.")
+    st.info("💡 Posisi vertikal untuk nama panjang sudah disetel ke titik tengah yang pas (tidak terlalu atas/bawah).")
 
 # Menentukan parameter dinamis berdasarkan template yang dipilih
 if "Panjang" in jenis_template:
     template_path = "Tiket Ceria Kaumpandak Waterpark.png"
-    batas_lebar_grup_persen = 0.80 # Sedikit diperketat agar aman di sisi kiri-kanan
-    y_grup_persen = 0.86           # Koordinat Y dinaikkan agar tidak menabrak batas bawah area putih
+    batas_lebar_grup_persen = 0.80 
+    # Diturunkan sedikit dari 0.86 ke 0.875 agar pas di tengah
+    y_grup_persen = 0.875           
 else:
     template_path = "Tiket Khusus Kaumpandak Waterpark (1).png"
     batas_lebar_grup_persen = 0.40 
-    y_grup_persen = 0.89           # Koordinat Y tetap untuk template pendek
+    # Koordinat Y tetap untuk template pendek
+    y_grup_persen = 0.89           
 
 try:
     img_master = Image.open(template_path).convert("RGB")
@@ -90,7 +92,7 @@ try:
     titik_tengah_y_tanggal = int(H * 0.175)
     
     titik_tengah_x_grup = int(W * 0.51) 
-    titik_tengah_y_grup = int(H * y_grup_persen) # Menggunakan nilai dinamis dari percabangan di atas
+    titik_tengah_y_grup = int(H * y_grup_persen) 
 
     draw_text_centered(draw, tanggal, font_tanggal, titik_tengah_x_tanggal, titik_tengah_y_tanggal, "#003366")
     draw_text_centered(draw, nama_grup, font_grup, titik_tengah_x_grup, titik_tengah_y_grup, "#003366")
