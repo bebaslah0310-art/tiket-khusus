@@ -21,18 +21,15 @@ with col1:
     tanggal = st.text_input("Tanggal Kunjungan", "21 NOVEMBER 2026")
     nama_grup = st.text_input("Nama Grup / Sekolah", "TEST DULU SEBELUM NYOBA CETAK")
     
-    st.info("💡 Posisi vertikal untuk nama panjang sudah disetel ke titik tengah yang pas (tidak terlalu atas/bawah).")
+    st.info("💡 Layout sudah diatur menggunakan margin sempit (0.5) dan posisi rata tengah sempurna (Center on page).")
 
-# Menentukan parameter dinamis berdasarkan template yang dipilih
 if "Panjang" in jenis_template:
     template_path = "Tiket Ceria Kaumpandak Waterpark.png"
     batas_lebar_grup_persen = 0.80 
-    # Diturunkan sedikit dari 0.86 ke 0.875 agar pas di tengah
     y_grup_persen = 0.875           
 else:
     template_path = "Tiket Khusus Kaumpandak Waterpark (1).png"
     batas_lebar_grup_persen = 0.40 
-    # Koordinat Y tetap untuk template pendek
     y_grup_persen = 0.89           
 
 try:
@@ -87,7 +84,6 @@ try:
         y = y_center - (text_height / 2) - offset_y
         draw.text((x, y), text, font=font, fill=color)
 
-    # Koordinat rata tengah dengan Y dinamis
     titik_tengah_x_tanggal = int(W * 0.81)
     titik_tengah_y_tanggal = int(H * 0.175)
     
@@ -97,15 +93,22 @@ try:
     draw_text_centered(draw, tanggal, font_tanggal, titik_tengah_x_tanggal, titik_tengah_y_tanggal, "#003366")
     draw_text_centered(draw, nama_grup, font_grup, titik_tengah_x_grup, titik_tengah_y_grup, "#003366")
 
+    # --- PENYESUAIAN MARGIN 0.5 & CENTER ON PAGE ---
     a4_width, a4_height = 2480, 3508
     kanvas_a4 = Image.new('RGB', (a4_width, a4_height), 'white')
 
-    ticket_w, ticket_h = 1120, 630
+    # Ukuran tiket diperbesar secara maksimal agar tidak banyak ruang kosong
+    ticket_w, ticket_h = 1160, 652 
     tiket_resized = img_master.resize((ticket_w, ticket_h), Image.LANCZOS)
 
-    margin_kiri = 100
-    margin_atas = 100
     jarak_potong = 40
+
+    # Rumus untuk rata tengah sempurna (Center Horizontally & Vertically)
+    total_lebar_grid = (ticket_w * 2) + jarak_potong
+    total_tinggi_grid = (ticket_h * 5) + (jarak_potong * 4)
+
+    margin_kiri = (a4_width - total_lebar_grid) // 2
+    margin_atas = (a4_height - total_tinggi_grid) // 2
 
     for baris in range(5):
         for kolom in range(2):
