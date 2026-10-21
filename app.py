@@ -18,8 +18,8 @@ with col1:
 
     st.subheader("📝 2. Edit Data Tiket")
     with st.form("form_edit_tiket"):
-        tanggal = st.text_input("Tanggal Kunjungan", "21 NOVEMBER 2026")
-        nama_grup = st.text_input("Nama Grup / Sekolah", "TEST DULU SEBELUM NYOBA CETAK")
+        tanggal = st.text_input("Tanggal Kunjungan", " ")
+        nama_grup = st.text_input("Nama Grup / Sekolah", " ")
         
         tombol_cek = st.form_submit_button("✅ Cek / Tampilkan")
     
