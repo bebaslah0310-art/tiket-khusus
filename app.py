@@ -4,31 +4,26 @@ import io
 import os
 import urllib.request
 
-# Mengatur tampilan halaman
 st.set_page_config(page_title="Cetak Tiket A4 Otomatis", layout="wide")
 
 st.title("🎟️ Generator Tiket Khusus A4 (Otomatis)")
 
-# --- AREA UTAMA (MEMBAGI JADI 2 KOLOM) ---
 col1, col2 = st.columns([1, 1.5])
 
 with col1:
     st.subheader("📝 1. Edit Data Tiket")
     tanggal = st.text_input("Tanggal Kunjungan", "21 NOVEMBER 2026")
-    nama_grup = st.text_input("Nama Grup / Sekolah", "TEST DULU SEBELUM NYOBA CETAK panjang soalnya")
+    nama_grup = st.text_input("Nama Grup / Sekolah", "TEST DULU SEBELUM NYOBA CETAK")
     
-    st.info("💡 Posisi vertikal (Atas-Bawah) tanggal dan nama grup sudah diturunkan agar pas di tengah area putih.")
+    st.info("💡 Posisi vertikal sudah dikalibrasi ulang sedikit ke atas agar pas di tengah area putih.")
 
-# --- PROSES PEMBUATAN TIKET & KANVAS A4 ---
 template_path = "Tiket Khusus Kaumpandak Waterpark (1).png"
 
 try:
-    # Load gambar master
     img_master = Image.open(template_path).convert("RGB")
     draw = ImageDraw.Draw(img_master)
     W, H = img_master.size
 
-    # Mengunduh font Roboto Bold
     font_url = "https://github.com/googlefonts/roboto/raw/main/src/hinted/Roboto-Bold.ttf"
     font_path = "Roboto-Bold.ttf"
     
@@ -36,7 +31,6 @@ try:
         with st.spinner("Mengunduh font tebal..."):
             urllib.request.urlretrieve(font_url, font_path)
 
-    # --- FUNGSI AUTO-SCALING FONT ---
     def get_optimal_font(text, font_path, max_font_size, max_width, draw):
         current_size = max_font_size
         font = ImageFont.truetype(font_path, current_size)
@@ -62,7 +56,6 @@ try:
     font_tanggal = get_optimal_font(tanggal, font_path, max_font_size=int(H * 0.045), max_width=max_width_tanggal, draw=draw)
     font_grup = get_optimal_font(nama_grup, font_path, max_font_size=int(H * 0.08), max_width=max_width_grup, draw=draw)
 
-    # --- FUNGSI UNTUK MENULIS TEKS RATA TENGAH ---
     def draw_text_centered(draw, text, font, x_center, y_center, color):
         try:
             bbox = draw.textbbox((0, 0), text, font=font)
@@ -74,24 +67,22 @@ try:
             text_width, text_height = draw.textsize(text, font=font)
             offset_x, offset_y = 0, 0
         
-        # Pengaturan Y sudah dibersihkan dari tarikan ke atas agar murni rata tengah
         x = x_center - (text_width / 2) - offset_x
         y = y_center - (text_height / 2) - offset_y
         draw.text((x, y), text, font=font, fill=color)
 
-    # --- KOORDINAT BARU (DITURUNKAN) ---
-    # Titik Y diturunkan dari 0.165 menjadi 0.185 agar menjauh dari tulisan "Tanggal :"
+    # --- KOORDINAT DIKALIBRASI ULANG ---
+    # Dinaikkan sedikit dari 0.185 ke 0.175
     titik_tengah_x_tanggal = int(W * 0.81)
-    titik_tengah_y_tanggal = int(H * 0.185)
+    titik_tengah_y_tanggal = int(H * 0.175)
     
-    # Titik Y diturunkan dari 0.885 menjadi 0.90 agar pas di tengah vertikal kotak bawah
+    # Dinaikkan sedikit dari 0.90 ke 0.89
     titik_tengah_x_grup = int(W * 0.51) 
-    titik_tengah_y_grup = int(H * 0.90)
+    titik_tengah_y_grup = int(H * 0.89)
 
     draw_text_centered(draw, tanggal, font_tanggal, titik_tengah_x_tanggal, titik_tengah_y_tanggal, "#003366")
     draw_text_centered(draw, nama_grup, font_grup, titik_tengah_x_grup, titik_tengah_y_grup, "#003366")
 
-    # --- MENYUSUN KE KERTAS A4 ---
     a4_width, a4_height = 2480, 3508
     kanvas_a4 = Image.new('RGB', (a4_width, a4_height), 'white')
 
@@ -108,7 +99,6 @@ try:
             y = margin_atas + baris * (ticket_h + jarak_potong)
             kanvas_a4.paste(tiket_resized, (x, y))
 
-    # --- TAMPILKAN PREVIEW & TOMBOL DOWNLOAD ---
     with col2:
         st.subheader("📄 2. Live Preview Kertas A4")
         st.image(kanvas_a4, caption="Preview Kertas A4 (Isi 10 Tiket, siap digunting)", use_column_width=True)
@@ -126,4 +116,4 @@ try:
         )
 
 except FileNotFoundError:
-    st.error(f"❌ Error: File gambar '{template_path}' tidak ditemukan. Pastikan nama file gambar di dalam folder sama persis.")
+    st.error("❌ Error: File gambar template tidak ditemukan. Pastikan nama file gambar di dalam folder sama persis.")
