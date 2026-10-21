@@ -2,7 +2,6 @@ import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 import io
 import os
-import base64
 
 st.set_page_config(page_title="Cetak Tiket A4 Otomatis", layout="wide")
 
@@ -24,7 +23,7 @@ with col1:
         
         tombol_cek = st.form_submit_button("✅ Cek / Tampilkan")
     
-    st.info("💡 Klik Cek / Tampilkan, lalu gunakan tombol Download atau Buka & Cetak PDF di sebelah kanan.")
+    st.info("💡 Klik Cek / Tampilkan, lalu unduh file PDF untuk hasil cetak A4 yang sempurna.")
 
 if "Panjang" in jenis_template:
     template_path = "Tiket Ceria Kaumpandak Waterpark.png"
@@ -33,7 +32,7 @@ if "Panjang" in jenis_template:
 else:
     template_path = "Tiket Khusus Kaumpandak Waterpark (1).png"
     batas_lebar_grup_persen = 0.40 
-    y_grup_persen = 0.885           
+    y_grup_persen = 0.88           
 
 try:
     img_master = Image.open(template_path).convert("RGB")
@@ -120,31 +119,22 @@ try:
             kanvas_a4.paste(tiket_resized, (x, y))
 
     with col2:
-        st.subheader("📄 3. Preview & Cetak")
+        st.subheader("📄 3. Preview Kertas A4 & Cetak")
         
         # Tampilkan preview gambar
-        st.image(kanvas_a4, caption="Preview Kertas A4 (Isi 10 Tiket, siap digunting)", use_container_width=True)
+        st.image(kanvas_a4, use_container_width=True)
 
         buf_pdf = io.BytesIO()
         kanvas_a4.save(buf_pdf, format="PDF", resolution=300.0)
         byte_pdf = buf_pdf.getvalue()
         
-        btn_col1, btn_col2 = st.columns(2)
-        
-        with btn_col1:
-            st.download_button(
-                label="⬇️ Download PDF",
-                data=byte_pdf,
-                file_name=f"Cetak_Tiket_{nama_grup.replace(' ', '_')}.pdf",
-                mime="application/pdf",
-                use_container_width=True
-            )
-            
-        with btn_col2:
-            # Mengonversi PDF ke Base64 agar bisa dibuka langsung di tab baru browser
-            b64_pdf = base64.b64encode(byte_pdf).decode('utf-8')
-            pdf_href = f'<a href="data:application/pdf;base64,{b64_pdf}" target="_blank" style="display:inline-block; width:100%; text-align:center; padding: 0.5rem 1rem; background-color: #FF4B4B; color: white; text-decoration: none; border-radius: 4px; font-size: 15px; font-family: sans-serif; font-weight: 500; box-sizing: border-box;">🖨️ Buka & Cetak PDF</a>'
-            st.markdown(pdf_href, unsafe_allow_html=True)
+        st.download_button(
+            label="📥 Download File PDF (Siap Cetak)",
+            data=byte_pdf,
+            file_name=f"Cetak_Tiket_{nama_grup.replace(' ', '_')}.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
 
 except FileNotFoundError:
     st.error(f"❌ Error: File gambar '{template_path}' tidak ditemukan. Pastikan nama file tersebut ada di folder yang sama.")
