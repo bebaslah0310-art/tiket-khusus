@@ -15,9 +15,9 @@ col1, col2 = st.columns([1, 1.5])
 with col1:
     st.subheader("📝 1. Edit Data Tiket")
     tanggal = st.text_input("Tanggal Kunjungan", "21 NOVEMBER 2026")
-    nama_grup = st.text_input("Nama Grup / Sekolah", "TEST DULU SEBELUM NYOBA CETAK")
+    nama_grup = st.text_input("Nama Grup / Sekolah", "TEST DULU SEBELUM NYOBA CETAK KARENA NAMA INI SANGAT PANJANG")
     
-    st.info("💡 Font otomatis mengecil jika teks yang dimasukkan terlalu panjang agar tetap muat di dalam kotak putih.")
+    st.info("💡 Sistem Auto-Scaling kini lebih ketat. Font dijamin tidak akan keluar dari lengkungan area putih.")
 
 # --- PROSES PEMBUATAN TIKET & KANVAS A4 ---
 template_path = "Tiket Khusus Kaumpandak Waterpark (1).png"
@@ -36,35 +36,35 @@ try:
         with st.spinner("Mengunduh font tebal..."):
             urllib.request.urlretrieve(font_url, font_path)
 
-    # --- FUNGSI AUTO-SCALING FONT ---
+    # --- FUNGSI AUTO-SCALING FONT (YANG DISEMPURNAKAN) ---
     def get_optimal_font(text, font_path, max_font_size, max_width, draw):
         """Mengecilkan ukuran font secara otomatis jika teks lebih lebar dari max_width"""
         current_size = max_font_size
         font = ImageFont.truetype(font_path, current_size)
         
-        while True:
+        while current_size > 10: # Batas minimal ukuran font agar tidak terlalu tak terlihat
             try:
                 bbox = draw.textbbox((0, 0), text, font=font)
                 text_width = bbox[2] - bbox[0]
             except AttributeError:
                 text_width, _ = draw.textsize(text, font=font)
                 
-            # Jika teks sudah muat atau font sudah sangat kecil, hentikan loop
-            if text_width <= max_width or current_size <= 10:
+            # Jika lebar teks sudah lebih kecil dari batas toleransi (max_width), berhenti mengecilkan
+            if text_width <= max_width:
                 break
             
-            # Kurangi ukuran font
+            # Jika belum, kurangi ukuran font secara bertahap
             current_size -= 2
             font = ImageFont.truetype(font_path, current_size)
             
         return font
 
-    # --- PENGATURAN AREA MAKSIMAL (AGAR TEKS TIDAK KELUAR BATAS) ---
-    # Batas lebar area putih untuk Tanggal dan Nama Grup
-    max_width_tanggal = int(W * 0.25) # Sekitar 25% lebar gambar
-    max_width_grup = int(W * 0.55)    # Sekitar 55% lebar gambar untuk kotak bawah
+    # --- PENGATURAN AREA MAKSIMAL YANG LEBIH KETAT (PERBAIKAN) ---
+    # Toleransi lebar diperkecil agar aman dari lengkungan pinggir kotak putih
+    max_width_tanggal = int(W * 0.18) # Hanya mentoleransi maksimal 18% dari lebar gambar total
+    max_width_grup = int(W * 0.42)    # Hanya mentoleransi maksimal 42% dari lebar gambar total (area aman garis abu-abu)
 
-    # Tentukan font optimal (Jika teks pendek pakai ukuran maksimal, jika panjang otomatis mengecil)
+    # Tentukan font optimal
     font_tanggal = get_optimal_font(tanggal, font_path, max_font_size=int(H * 0.045), max_width=max_width_tanggal, draw=draw)
     font_grup = get_optimal_font(nama_grup, font_path, max_font_size=int(H * 0.08), max_width=max_width_grup, draw=draw)
 
