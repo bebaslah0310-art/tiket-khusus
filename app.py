@@ -2,6 +2,9 @@ import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 import io
 import os
+import urllib.request
+import base64
+import streamlit.components.v1 as components
 
 st.set_page_config(page_title="Cetak Tiket A4 Otomatis", layout="wide")
 
@@ -23,7 +26,7 @@ with col1:
         
         tombol_cek = st.form_submit_button("✅ Cek / Tampilkan")
     
-    st.info("💡 Klik Cek / Tampilkan Lalu Download File PDF Nya.")
+    st.info("💡 Klik Cek / Tampilkan lalu Anda bisa langsung Print atau Download PDF.")
 
 if "Panjang" in jenis_template:
     template_path = "Tiket Ceria Kaumpandak Waterpark.png"
@@ -120,20 +123,50 @@ try:
 
     with col2:
         st.subheader("📄 3. Live Preview Kertas A4")
-        # PERBAIKAN: Mengganti use_column_width menjadi use_container_width
         st.image(kanvas_a4, caption="Preview Kertas A4 (Isi 10 Tiket, siap digunting)", use_container_width=True)
 
         buf_pdf = io.BytesIO()
         kanvas_a4.save(buf_pdf, format="PDF", resolution=300.0)
         byte_pdf = buf_pdf.getvalue()
         
-        st.download_button(
-            label="⬇️ Download File PDF (Siap Print)",
-            data=byte_pdf,
-            file_name=f"Cetak_Tiket_{nama_grup.replace(' ', '_')}.pdf",
-            mime="application/pdf",
-            use_container_width=True
-        )
+        # Kolom pembagian untuk 2 tombol (Download & Print)
+        btn_col1, btn_col2 = st.columns(2)
+        
+        with btn_col1:
+            st.download_button(
+                label="⬇️ Download File PDF",
+                data=byte_pdf,
+                file_name=f"Cetak_Tiket_{nama_grup.replace(' ', '_')}.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+            
+        with btn_col2:
+            # Mengonversi PDF ke Base64 agar bisa dibaca browser
+            b64_pdf = base64.b64encode(byte_pdf).decode('utf-8')
+            
+            # Script HTML + JavaScript untuk memunculkan dialog Print
+            print_html = f"""
+            <script>
+                function printPdf() {{
+                    var iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.src = 'data:application/pdf;base64,{b64_pdf}';
+                    document.body.appendChild(iframe);
+                    iframe.onload = function() {{
+                        setTimeout(function() {{
+                            iframe.focus();
+                            iframe.contentWindow.print();
+                        }}, 100);
+                    }};
+                }}
+            </script>
+            <button onclick="printPdf()" style="width: 100%; padding: 0.4rem 1rem; background-color: #FF4B4B; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-family: sans-serif; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Cetak Langsung (Print)
+            </button>
+            """
+            components.html(print_html, height=50)
 
 except FileNotFoundError:
     st.error(f"❌ Error: File gambar '{template_path}' tidak ditemukan. Pastikan nama file tersebut ada di folder yang sama.")
