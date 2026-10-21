@@ -121,8 +121,8 @@ try:
     with col2:
         st.subheader("📄 3. Preview Kertas A4 & Cetak")
         
-        # Tampilkan preview gambar
-        st.image(kanvas_a4, use_container_width=True)
+        # Menggunakan width='stretch' sesuai standar terbaru Streamlit
+        st.image(kanvas_a4, width='stretch')
 
         buf_pdf = io.BytesIO()
         kanvas_a4.save(buf_pdf, format="PDF", resolution=300.0)
@@ -133,7 +133,7 @@ try:
             data=byte_pdf,
             file_name=f"Cetak_Tiket_{nama_grup.replace(' ', '_')}.pdf",
             mime="application/pdf",
-            use_container_width=True
+            width='stretch'
         )
 
 except FileNotFoundError:
