@@ -23,7 +23,7 @@ with col1:
         
         tombol_cek = st.form_submit_button("✅ Cek / Tampilkan")
     
-    st.info("💡 Sistem kini disetel untuk menggunakan font Calibri Bold.")
+    st.info("💡 Klik Cek / Tampilkan Lalu Download File PDF Nya.")
 
 if "Panjang" in jenis_template:
     template_path = "Tiket Ceria Kaumpandak Waterpark.png"
@@ -32,7 +32,7 @@ if "Panjang" in jenis_template:
 else:
     template_path = "Tiket Khusus Kaumpandak Waterpark (1).png"
     batas_lebar_grup_persen = 0.40 
-    y_grup_persen = 0.87           
+    y_grup_persen = 0.88           
 
 try:
     img_master = Image.open(template_path).convert("RGB")
@@ -65,7 +65,6 @@ try:
                 
             return font
         except OSError:
-            # Fallback jika font calibrib.ttf gagal dimuat / belum diupload
             return ImageFont.load_default()
 
     max_width_tanggal = int(W * 0.18) 
@@ -121,7 +120,8 @@ try:
 
     with col2:
         st.subheader("📄 3. Live Preview Kertas A4")
-        st.image(kanvas_a4, caption="Preview Kertas A4 (Isi 10 Tiket, siap digunting)", use_column_width=True)
+        # PERBAIKAN: Mengganti use_column_width menjadi use_container_width
+        st.image(kanvas_a4, caption="Preview Kertas A4 (Isi 10 Tiket, siap digunting)", use_container_width=True)
 
         buf_pdf = io.BytesIO()
         kanvas_a4.save(buf_pdf, format="PDF", resolution=300.0)
