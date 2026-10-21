@@ -2,7 +2,6 @@ import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 import io
 import os
-import urllib.request
 
 st.set_page_config(page_title="Cetak Tiket A4 Otomatis", layout="wide")
 
@@ -18,15 +17,13 @@ with col1:
     )
 
     st.subheader("📝 2. Edit Data Tiket")
-    # Menggunakan st.form agar tidak loading setiap kali mengetik
     with st.form("form_edit_tiket"):
-        tanggal = st.text_input("Tanggal Kunjungan", "21 test 2026")
-        nama_grup = st.text_input("Nama Grup / Sekolah", "test disini")
+        tanggal = st.text_input("Tanggal Kunjungan", "21 NOVEMBER 2026")
+        nama_grup = st.text_input("Nama Grup / Sekolah", "TEST DULU SEBELUM NYOBA CETAK")
         
-        # Tombol OK / Cek
         tombol_cek = st.form_submit_button("✅ Cek / Tampilkan")
     
-    st.info("💡 Ketik data tiket sampai selesai, lalu klik tombol 'Cek / Tampilkan' di atas untuk melihat hasilnya.")
+    st.info("💡 Sistem kini disetel untuk menggunakan font Calibri Bold.")
 
 if "Panjang" in jenis_template:
     template_path = "Tiket Ceria Kaumpandak Waterpark.png"
@@ -35,38 +32,41 @@ if "Panjang" in jenis_template:
 else:
     template_path = "Tiket Khusus Kaumpandak Waterpark (1).png"
     batas_lebar_grup_persen = 0.40 
-    y_grup_persen = 0.88           
+    y_grup_persen = 0.87           
 
 try:
     img_master = Image.open(template_path).convert("RGB")
     draw = ImageDraw.Draw(img_master)
     W, H = img_master.size
 
-    font_url = "https://github.com/googlefonts/roboto/raw/main/src/hinted/Roboto-Bold.ttf"
-    font_path = "Roboto-Bold.ttf"
+    # --- PENGATURAN FONT CALIBRI BOLD ---
+    font_path = "calibrib.ttf"
     
     if not os.path.exists(font_path):
-        with st.spinner("Mengunduh font tebal..."):
-            urllib.request.urlretrieve(font_url, font_path)
+        st.warning("⚠️ Peringatan: File font 'calibrib.ttf' tidak ditemukan di folder. Silakan upload file tersebut agar font Calibri Bold bisa diterapkan.")
 
     def get_optimal_font(text, font_path, max_font_size, max_width, draw):
         current_size = max_font_size
-        font = ImageFont.truetype(font_path, current_size)
-        
-        while current_size > 10: 
-            try:
-                bbox = draw.textbbox((0, 0), text, font=font)
-                text_width = bbox[2] - bbox[0]
-            except AttributeError:
-                text_width, _ = draw.textsize(text, font=font)
-                
-            if text_width <= max_width:
-                break
-            
-            current_size -= 2
+        try:
             font = ImageFont.truetype(font_path, current_size)
             
-        return font
+            while current_size > 10: 
+                try:
+                    bbox = draw.textbbox((0, 0), text, font=font)
+                    text_width = bbox[2] - bbox[0]
+                except AttributeError:
+                    text_width, _ = draw.textsize(text, font=font)
+                    
+                if text_width <= max_width:
+                    break
+                
+                current_size -= 2
+                font = ImageFont.truetype(font_path, current_size)
+                
+            return font
+        except OSError:
+            # Fallback jika font calibrib.ttf gagal dimuat / belum diupload
+            return ImageFont.load_default()
 
     max_width_tanggal = int(W * 0.18) 
     max_width_grup = int(W * batas_lebar_grup_persen)    
