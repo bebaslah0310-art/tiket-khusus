@@ -2,7 +2,6 @@ import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 import io
 import os
-import base64
 
 st.set_page_config(page_title="Cetak Tiket A4 Otomatis", layout="wide")
 
@@ -24,7 +23,7 @@ with col1:
         
         tombol_cek = st.form_submit_button("✅ Cek / Tampilkan")
     
-    st.info("💡 Klik Cek / Tampilkan lalu Anda bisa langsung cetak menggunakan ikon Print di panel PDF sebelah kanan.")
+    st.info("💡 Klik Cek / Tampilkan Lalu Download File PDF Nya.")
 
 if "Panjang" in jenis_template:
     template_path = "Tiket Ceria Kaumpandak Waterpark.png"
@@ -120,28 +119,22 @@ try:
             kanvas_a4.paste(tiket_resized, (x, y))
 
     with col2:
-        st.subheader("📄 3. Preview & Cetak Langsung")
+        st.subheader("📄 3. Live Preview Kertas A4")
         
-        # Simpan ke memori sebagai PDF
+        # Mengembalikan preview gambar yang stabil dan aman
+        st.image(kanvas_a4, caption="Preview Kertas A4 (Isi 10 Tiket, siap digunting)", use_container_width=True)
+
         buf_pdf = io.BytesIO()
         kanvas_a4.save(buf_pdf, format="PDF", resolution=300.0)
         byte_pdf = buf_pdf.getvalue()
         
         st.download_button(
-            label="⬇️ Download File PDF (Cadangan)",
+            label="⬇️ Download File PDF (Siap Print)",
             data=byte_pdf,
             file_name=f"Cetak_Tiket_{nama_grup.replace(' ', '_')}.pdf",
             mime="application/pdf",
             use_container_width=True
         )
-        
-        st.markdown("---")
-        st.write("**Arahkan kursor ke area kotak di bawah ini, lalu klik ikon 🖨️ (Print) di kanan atas untuk mencetak langsung.**")
-        
-        # Mengubah PDF menjadi format Base64 dan menampilkannya di dalam iframe
-        b64_pdf = base64.b64encode(byte_pdf).decode('utf-8')
-        pdf_display = f'<iframe src="data:application/pdf;base64,{b64_pdf}" width="100%" height="850" type="application/pdf"></iframe>'
-        st.markdown(pdf_display, unsafe_allow_html=True)
 
 except FileNotFoundError:
     st.error(f"❌ Error: File gambar '{template_path}' tidak ditemukan. Pastikan nama file tersebut ada di folder yang sama.")
