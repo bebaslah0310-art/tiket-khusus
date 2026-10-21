@@ -19,7 +19,7 @@ with col1:
     st.info("💡 Ketik data di atas, dan pratinjau kertas A4 di sebelah kanan akan langsung diperbarui.")
 
 # --- PROSES PEMBUATAN TIKET & KANVAS A4 ---
-template_path = "Tiket Khusus Kaumpandak Waterpark (1).jpg"
+template_path = "Tiket Khusus Kaumpandak Waterpark (1).png"
 
 try:
     # 1. Load gambar master
