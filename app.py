@@ -18,10 +18,15 @@ with col1:
     )
 
     st.subheader("📝 2. Edit Data Tiket")
-    tanggal = st.text_input("Tanggal Kunjungan", "21 NOVEMBER 2026")
-    nama_grup = st.text_input("Nama Grup / Sekolah", "TEST DULU SEBELUM NYOBA CETAK")
+    # Menggunakan st.form agar tidak loading setiap kali mengetik
+    with st.form("form_edit_tiket"):
+        tanggal = st.text_input("Tanggal Kunjungan", "21 test 2026")
+        nama_grup = st.text_input("Nama Grup / Sekolah", "test disini")
+        
+        # Tombol OK / Cek
+        tombol_cek = st.form_submit_button("✅ Cek / Tampilkan")
     
-    st.info("💡 Layout sudah diatur menggunakan margin sempit (0.5) dan posisi rata tengah sempurna (Center on page).")
+    st.info("💡 Ketik data tiket sampai selesai, lalu klik tombol 'Cek / Tampilkan' di atas untuk melihat hasilnya.")
 
 if "Panjang" in jenis_template:
     template_path = "Tiket Ceria Kaumpandak Waterpark.png"
@@ -97,13 +102,11 @@ try:
     a4_width, a4_height = 2480, 3508
     kanvas_a4 = Image.new('RGB', (a4_width, a4_height), 'white')
 
-    # Ukuran tiket diperbesar secara maksimal agar tidak banyak ruang kosong
     ticket_w, ticket_h = 1160, 652 
     tiket_resized = img_master.resize((ticket_w, ticket_h), Image.LANCZOS)
 
     jarak_potong = 40
 
-    # Rumus untuk rata tengah sempurna (Center Horizontally & Vertically)
     total_lebar_grid = (ticket_w * 2) + jarak_potong
     total_tinggi_grid = (ticket_h * 5) + (jarak_potong * 4)
 
